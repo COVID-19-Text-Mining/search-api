@@ -6,7 +6,6 @@ from starlette.responses import JSONResponse
 db = CovidscholarDB()
 app = FastAPI()
 
-
 # Sentry Error Logging
 sentry_sdk.init(
     dsn="https://230802b6ec5a4433b7c4c0bc74401665@sentry.io/1480752"
@@ -24,14 +23,22 @@ async def test_api(test_string: str):
 
 
 @app.get("/entries/")
-async def search_entries(title: str="", abstract: str=""):
+async def search_entries(title: str = "", abstract: str = ""):
     query_string = title
     if abstract != "":
         query_string += abstract
-    result = [{k:str(v) for k,v in e.items() if k != "_id"} for e in db.entries.find({"$text": {"$search": query_string}})]
+    result = [{k: str(v) for k, v in e.items() if k != "_id"} for e in
+              db.entries.find({"$text": {"$search": query_string}})]
     return JSONResponse(result)
 
-#Entries collection format
+
+@app.get("/submissions/")
+async def get_submissions():
+    result = [{k: str(v) for k, v in e.items() if k != "_id"} for e in db.google_form_submissions.find({})]
+    return JSONResponse(result)
+
+
+# Entries collection format
 """
 {
 *"Title": string,
