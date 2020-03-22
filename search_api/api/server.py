@@ -34,7 +34,10 @@ async def search_entries(title: str = "", abstract: str = ""):
 
 @app.get("/submissions/")
 async def get_submissions():
-    result = [{k: str(v) for k, v in e.items() if k != "_id"} for e in db.google_form_submissions.find({})]
+    result = [{k: str(v) for k, v in e.items()
+               if k not in ["_id", "submission_email", "pdf_location", "row_id"]}
+              for e in
+              db.google_form_submissions.find({})]
     return JSONResponse(result)
 
 
