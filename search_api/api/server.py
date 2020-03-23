@@ -36,11 +36,13 @@ async def search_entries(title: str = "", abstract: str = ""):
 @app.post("/search/")
 async def search(text: str = "", limit: int = 500):
     abstracts = search_abstracts(text, limit=limit)
+    print(type(abstracts))
     return JSONResponse(abstracts)
 
 
 @app.get("/submissions/")
-async def search():
+async def get_all_submissions():
+    print(get_all())
     return JSONResponse(get_all())
 
 

@@ -37,10 +37,8 @@ def search_abstracts(text, limit=max_results):
         abstracts_partial = []
 
     for k in abstracts_exact:
-        print(k.keys())
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
     for k in abstracts_partial:
-        print(k.keys())
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
 
             # Jam it all in a dict to hand over to the front end
@@ -54,7 +52,9 @@ def get_all():
     Return all submissions.
 
     """
-    return list(db.google_form_submissions.find({}))
+    entries = list(db.google_form_submissions.find({}))
+    return [{k: v for k, v in a.items() if k not in ['_id', "last_updated", "PDF_gridfs_id", "pdf_location", "submission_email"]}
+                 for a in entries]
 
 def __search_exact(text, limit):
     """
