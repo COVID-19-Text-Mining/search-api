@@ -2,7 +2,8 @@ import sentry_sdk
 from fastapi import FastAPI
 from search_api.database import CovidscholarDB
 from starlette.responses import JSONResponse
-from search_api.api.search import search_abstracts, get_all
+from search_api.api.search import search_abstracts, get_all, k_most_recent
+from pprint import pprint
 
 db = CovidscholarDB()
 app = FastAPI()
@@ -28,7 +29,7 @@ async def search_entries(title: str = "", abstract: str = ""):
     query_string = title
     if abstract != "":
         query_string += abstract
-    result = [{k: str(v) for k, v in e.items() if k != "_id"} for e in
+    result = [{k: str(v) for k, v in e.items() if k not in ["_id", "last_updated"]} for e in
               db.entries.find({"$text": {"$search": query_string}})]
     return JSONResponse(result)
 
@@ -36,14 +37,17 @@ async def search_entries(title: str = "", abstract: str = ""):
 @app.post("/search/")
 async def search(text: str = "", limit: int = 500):
     abstracts = search_abstracts(text, limit=limit)
-    print(type(abstracts))
     return JSONResponse(abstracts)
 
 
 @app.get("/submissions/")
 async def get_all_submissions():
-    print(get_all())
     return JSONResponse(get_all())
+
+@app.get("/most_recent/")
+async def most_recent():
+    most_recent_submissions = k_most_recent(5)
+    return JSONResponse(most_recent_submissions)
 
 
 # Entries collection format

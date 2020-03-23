@@ -38,8 +38,14 @@ def search_abstracts(text, limit=max_results):
 
     for k in abstracts_exact:
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
+        if 'publication_date' in k.keys():
+            k['publication_date'] = k['publication_date'].strftime("%m/%d/%Y, %H:%M:%S")
+
     for k in abstracts_partial:
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
+        if 'publication_date' in k.keys():
+            k['publication_date'] = k['publication_date'].strftime("%m/%d/%Y, %H:%M:%S")
+
 
             # Jam it all in a dict to hand over to the front end
     return_dict = dict()
@@ -53,8 +59,27 @@ def get_all():
 
     """
     entries = list(db.google_form_submissions.find({}))
-    return [{k: v for k, v in a.items() if k not in ['_id', "last_updated", "PDF_gridfs_id", "pdf_location", "submission_email"]}
+    entries = [{k: v for k, v in a.items() if k not in ['_id', "last_updated", "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result"]}
                  for a in entries]
+    for e in entries:
+        if 'publication_date' in e.keys():
+            e['publication_date'] = e['publication_date'].strftime("%m/%d/%Y, %H:%M:%S")
+
+    return entries
+
+def k_most_recent(k):
+    """
+    Get the k most recent submissions through the google form
+    """
+    entries = list(db.google_form_submissions.find({}).sort("_id", -1).limit(k))
+    entries = [{k: v for k, v in a.items() if k not in ['_id', "last_updated", "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result"]}
+                 for a in entries]
+    for e in entries:
+        if 'publication_date' in e.keys():
+            e['publication_date'] = e['publication_date'].strftime("%m/%d/%Y, %H:%M:%S")
+
+    return entries
+
 
 def __search_exact(text, limit):
     """
@@ -101,7 +126,7 @@ def __search_exact(text, limit):
     # Keep a list of ids to make sure we dont find them again in partial matches
     ids = [a['_id'] for a in abstracts]
     # Clean '_id' key
-    abstracts = [{k: v for k, v in a.items() if k not in ['_id', "PDF_gridfs_id", "pdf_location", "submission_email"]}
+    abstracts = [{k: v for k, v in a.items() if k not in ['_id', "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result"]}
                  for a in abstracts]
     return abstracts, ids
 
@@ -133,7 +158,7 @@ def __search_partial(text, limit, ids_exact):
     abstracts = [a for a in db.google_form_submissions.aggregate(pipeline)]
 
     # clean '_id' key
-    abstracts = [{k: v for k, v in a.items() if k not in ['_id', "PDF_gridfs_id", "submission_email", "pdf_location",]}
+    abstracts = [{k: v for k, v in a.items() if k not in ['_id', "PDF_gridfs_id", "submission_email", "pdf_location", "crossref_raw_result"]}
                  for a in abstracts]
 
     return abstracts
