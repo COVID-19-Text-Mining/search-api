@@ -101,7 +101,7 @@ def __search_exact(text, limit):
     # Keep a list of ids to make sure we dont find them again in partial matches
     ids = [a['_id'] for a in abstracts]
     # Clean '_id' key
-    abstracts = [{k: v for k, v in a.items() if k not in ['_id', "PDF_gridfs_id"]}
+    abstracts = [{k: v for k, v in a.items() if k not in ['_id', "PDF_gridfs_id", "pdf_location", "submission_email"]}
                  for a in abstracts]
     return abstracts, ids
 
@@ -133,7 +133,7 @@ def __search_partial(text, limit, ids_exact):
     abstracts = [a for a in db.google_form_submissions.aggregate(pipeline)]
 
     # clean '_id' key
-    abstracts = [{k: v for k, v in a.items() if k not in ['_id', "PDF_gridfs_id"]}
+    abstracts = [{k: v for k, v in a.items() if k not in ['_id', "PDF_gridfs_id", "submission_email", "pdf_location",]}
                  for a in abstracts]
 
     return abstracts
