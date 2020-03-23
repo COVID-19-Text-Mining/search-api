@@ -2,6 +2,7 @@ import sentry_sdk
 from fastapi import FastAPI
 from search_api.database import CovidscholarDB
 from starlette.responses import JSONResponse
+from search_api.api.search import search_abstracts, get_all
 
 db = CovidscholarDB()
 app = FastAPI()
@@ -32,13 +33,15 @@ async def search_entries(title: str = "", abstract: str = ""):
     return JSONResponse(result)
 
 
+@app.post("/search/")
+async def search(text: str = "", limit: int = 500):
+    abstracts = search_abstracts(text, limit=limit)
+    return JSONResponse(abstracts)
+
+
 @app.get("/submissions/")
-async def get_submissions():
-    result = [{k: str(v) for k, v in e.items()
-               if k not in ["_id", "submission_email", "pdf_location", "row_id"]}
-              for e in
-              db.google_form_submissions.find({})]
-    return JSONResponse(result)
+async def search():
+    return JSONResponse(get_all())
 
 
 # Entries collection format

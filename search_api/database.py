@@ -15,6 +15,7 @@ class CovidscholarDB:
                              password=os.getenv("COVID_PASS"), authSource=os.getenv("COVID_DB"))
         self._mongo_db = self._client[os.getenv("COVID_DB")]
         self.entries = self._mongo_db.entries_trial
+        self.submissions = self._mongo_db.google_form_submissions
 
         # self._elastic_db = Elasticsearch(hosts=[os.environ["COVID_ELASTIC_HOST"]],
         #                                  http_auth=(os.environ['COVID_ELASTIC_USER'],
