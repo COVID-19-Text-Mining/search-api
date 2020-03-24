@@ -9,12 +9,13 @@ db = client[os.getenv('COVID_DB')]
 
 max_results = 500
 
-def search_abstracts(text, limit=max_results):
+def search_abstracts(text, collection, limit=max_results):
     """
     Search on the abstracts collection
 
     Inputs:
             text (str): text to search. Searches both entities and text matches
+            collection (str): name of collection on which to search
             limit (int): number of abstracts to return.
 
     Returns:
@@ -25,26 +26,31 @@ def search_abstracts(text, limit=max_results):
     """
 
     # First get the exact text matches
-    abstracts_exact, ids_exact = __search_exact(text, limit)
+    abstracts_exact, ids_exact = __search_exact(text, collection, limit)
 
     remaining_limit = limit - len(abstracts_exact)
 
     # If we don't have at least limit results, get partial matches
     if remaining_limit >= 1:
         abstracts_partial = __search_partial(
-            text, remaining_limit, ids_exact)
+            text,  collection, remaining_limit, ids_exact,)
     else:
         abstracts_partial = []
 
     for k in abstracts_exact:
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
-        if 'publication_date' in k.keys():
+        if 'publication_date' in k.keys() and k['publication_date'] is not None:
             k['publication_date'] = k['publication_date'].strftime("%m/%d/%Y, %H:%M:%S")
+        if '_bt' in k.keys() and k['_bt'] is not None:
+            k['_bt'] = k['_bt'].strftime("%m/%d/%Y, %H:%M:%S")
+
 
     for k in abstracts_partial:
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
-        if 'publication_date' in k.keys():
+        if 'publication_date' in k.keys() and k['publication_date'] is not None:
             k['publication_date'] = k['publication_date'].strftime("%m/%d/%Y, %H:%M:%S")
+        if '_bt' in k.keys() and k['_bt'] is not None:
+            k['_bt'] = k['_bt'].strftime("%m/%d/%Y, %H:%M:%S")
 
 
             # Jam it all in a dict to hand over to the front end
@@ -81,7 +87,7 @@ def k_most_recent(k):
     return entries
 
 
-def __search_exact(text, limit):
+def __search_exact(text, collection, limit):
     """
     Find exact matches for text search
     In order of priority, we perform;
@@ -90,6 +96,7 @@ def __search_exact(text, limit):
     Until at least (limit) abstracts are found
     Inputs:
             text (str): text to search. Searches both entities and text matches
+            collection (str): name of collection to search over
             limit (int): number of abstracts to return.
 
     Returns:
@@ -104,7 +111,7 @@ def __search_exact(text, limit):
 
     pipeline.append({"$limit": limit})
 
-    abstracts += [a for a in db.google_form_submissions.aggregate(pipeline)]
+    abstracts += [a for a in db[collection].aggregate(pipeline)]
 
     # See if we have at least limit results
     if len(abstracts) >= limit:
@@ -119,7 +126,7 @@ def __search_exact(text, limit):
 
     pipeline.append({"$limit": limit})
 
-    abstracts += [a for a in db.google_form_submissions.aggregate(pipeline)]
+    abstracts += [a for a in db[collection].aggregate(pipeline)]
     # Remove duplicates
     abstracts = [i for n, i in enumerate(abstracts) if str(i['_id']) not in [
         str(a['_id']) for a in abstracts[:n]]]
@@ -131,12 +138,13 @@ def __search_exact(text, limit):
     return abstracts, ids
 
 
-def __search_partial(text, limit, ids_exact):
+def __search_partial(text, collection, limit, ids_exact):
     """
     Find partial matches for text search
     Until at least (limit) abstracts are found
     Inputs:
             text (str): text to search. Searches both entities and text matches
+            collection (str): name of collection to search over
             limit (int): number of abstracts to return.
             ids_exact (list): ids of exact matches
 
@@ -155,7 +163,7 @@ def __search_partial(text, limit, ids_exact):
 
     pipeline.append({"$limit": limit})
 
-    abstracts = [a for a in db.google_form_submissions.aggregate(pipeline)]
+    abstracts = [a for a in db[collection].aggregate(pipeline)]
 
     # clean '_id' key
     abstracts = [{k: v for k, v in a.items() if k not in ['_id', "PDF_gridfs_id", "submission_email", "pdf_location", "crossref_raw_result"]}
