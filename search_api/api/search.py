@@ -9,7 +9,7 @@ db = client[os.getenv('COVID_DB')]
 
 max_results = 500
 
-def search_abstracts(text, collection, limit=max_results):
+def search_abstracts(text, collection, limit=max_results, covid19_only=False):
     """
     Search on the abstracts collection
 
@@ -26,14 +26,14 @@ def search_abstracts(text, collection, limit=max_results):
     """
 
     # First get the exact text matches
-    abstracts_exact, ids_exact = __search_exact(text, collection, limit)
+    abstracts_exact, ids_exact = __search_exact(text, collection, limit, covid19_only)
 
     remaining_limit = limit - len(abstracts_exact)
 
     # If we don't have at least limit results, get partial matches
     if remaining_limit >= 1:
         abstracts_partial = __search_partial(
-            text,  collection, remaining_limit, ids_exact,)
+            text,  collection, remaining_limit, ids_exact, covid19_only)
     else:
         abstracts_partial = []
 
@@ -85,7 +85,7 @@ def k_most_recent(k):
     return entries
 
 
-def __search_exact(text, collection, limit):
+def __search_exact(text, collection, limit, covid19_only = False):
     """
     Find exact matches for text search
     In order of priority, we perform;
@@ -96,6 +96,7 @@ def __search_exact(text, collection, limit):
             text (str): text to search. Searches both entities and text matches
             collection (str): name of collection to search over
             limit (int): number of abstracts to return.
+            covid19_only (bool): whether to restrict only to those entries about covid19
 
     Returns:
             List of abstract dicts
@@ -107,7 +108,12 @@ def __search_exact(text, collection, limit):
     pipeline.append(
         {"$match": {"keywords": {"$regex": text, "$options": "imx"}}})
 
+    if covid19_only:
+        pipeline.append(
+            {"$match": {"is_covid19": True}})
+
     pipeline.append({"$limit": limit})
+
 
     abstracts += [a for a in db[collection].aggregate(pipeline)]
 
@@ -119,6 +125,10 @@ def __search_exact(text, collection, limit):
     pipeline = []
 
     pipeline.append({"$match": {'$text': {'$search': "\"{}\"".format(text)}}})
+
+    if covid19_only:
+        pipeline.append(
+            {"$match": {"is_covid19": True}})
 
     pipeline.append({'$sort': {'score': {'$meta': "textScore"}}})
 
@@ -136,7 +146,7 @@ def __search_exact(text, collection, limit):
     return abstracts, ids
 
 
-def __search_partial(text, collection, limit, ids_exact):
+def __search_partial(text, collection, limit, ids_exact, covid19_only = False):
     """
     Find partial matches for text search
     Until at least (limit) abstracts are found
@@ -145,6 +155,7 @@ def __search_partial(text, collection, limit, ids_exact):
             collection (str): name of collection to search over
             limit (int): number of abstracts to return.
             ids_exact (list): ids of exact matches
+            covid19_only (bool): whether to restrict only to those entries about covid19
 
     Returns:
             List of abstract dicts
@@ -154,6 +165,10 @@ def __search_partial(text, collection, limit, ids_exact):
     pipeline = []
 
     pipeline.append({"$match": {'$text': {'$search': text}}})
+
+    if covid19_only:
+        pipeline.append(
+            {"$match": {"is_covid19": True}})
 
     pipeline.append({'$sort': {'score': {'$meta': "textScore"}}})
 

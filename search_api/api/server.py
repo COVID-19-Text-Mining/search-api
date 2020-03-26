@@ -25,14 +25,14 @@ async def test_api(test_string: str):
 
 
 @app.post("/entries/")
-async def entries(text: str = "", limit: int = 500):
-    abstracts = search_abstracts(text, limit=limit, collection="entries")
+async def entries(text: str = "", limit: int = 500, covid19_only: bool = False):
+    abstracts = search_abstracts(text, limit=limit, collection="entries", covid19_only=covid19_only)
     return JSONResponse(abstracts)
 
 
 @app.post("/search/")
-async def search(text: str = "", limit: int = 500):
-    abstracts = search_abstracts(text, limit=limit, collection="google_form_submissions")
+async def search(text: str = "", limit: int = 500, covid19_only: bool = False):
+    abstracts = search_abstracts(text, limit=limit, collection="google_form_submissions", covid19_only=covid19_only)
     return JSONResponse(abstracts)
 
 
