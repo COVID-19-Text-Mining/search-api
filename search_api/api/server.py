@@ -24,19 +24,15 @@ async def test_api(test_string: str):
     return test_string
 
 
-@app.get("/entries/")
-async def search_entries(title: str = "", abstract: str = ""):
-    query_string = title
-    if abstract != "":
-        query_string += abstract
-    result = [{k: str(v) for k, v in e.items() if k not in ["_id", "last_updated"]} for e in
-              db.entries.find({"$text": {"$search": query_string}})]
-    return JSONResponse(result)
+@app.post("/entries/")
+async def entries(text: str = "", limit: int = 500, covid19_only: bool = False):
+    abstracts = search_abstracts(text, limit=limit, collection="entries", covid19_only=covid19_only)
+    return JSONResponse(abstracts)
 
 
 @app.post("/search/")
-async def search(text: str = "", limit: int = 500):
-    abstracts = search_abstracts(text, limit=limit)
+async def search(text: str = "", limit: int = 500, covid19_only: bool = False):
+    abstracts = search_abstracts(text, limit=limit, collection="google_form_submissions", covid19_only=covid19_only)
     return JSONResponse(abstracts)
 
 
