@@ -76,7 +76,7 @@ def k_most_recent(k):
                  for a in entries]
     for e in entries:
         if 'publication_date' in e.keys():
-            e['publication_date'] = e['publication_date'].strftime("%m/%d/%Y, %H:%M:%S")
+            e['publication_date'] = e['publication_date'].strftime("%m/%d/%Y")
 
     return entries
 

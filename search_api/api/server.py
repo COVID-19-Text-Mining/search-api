@@ -10,7 +10,7 @@ app = FastAPI()
 
 # Sentry Error Logging
 sentry_sdk.init(
-    dsn="https://230802b6ec5a4433b7c4c0bc74401665@sentry.io/1480752"
+    dsn="https://cc3f924ad01c4e1797438ad8ce49f32c@sentry.io/5172541"
 )
 
 
