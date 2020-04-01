@@ -2,7 +2,7 @@ import sentry_sdk
 from fastapi import FastAPI
 from search_api.database import CovidscholarDB
 from starlette.responses import JSONResponse
-from search_api.api.search import search_abstracts, get_all, k_most_recent
+from search_api.api.search import search_abstracts, get_all, k_most_recently_published, k_most_recently_submitted
 from pprint import pprint
 
 db = CovidscholarDB()
@@ -25,13 +25,13 @@ async def test_api(test_string: str):
 
 
 @app.post("/entries/")
-async def entries(text: str = "", limit: int = 500, covid19_only: bool = False):
+async def entries(text: str = "", limit: int = 100, covid19_only: bool = False):
     abstracts = search_abstracts(text, limit=limit, collection="entries", covid19_only=covid19_only)
     return JSONResponse(abstracts)
 
 
 @app.post("/search/")
-async def search(text: str = "", limit: int = 500, covid19_only: bool = False):
+async def search(text: str = "", limit: int = 100, covid19_only: bool = False):
     abstracts = search_abstracts(text, limit=limit, collection="google_form_submissions", covid19_only=covid19_only)
     return JSONResponse(abstracts)
 
@@ -41,10 +41,14 @@ async def get_all_submissions():
     return JSONResponse(get_all())
 
 @app.get("/most_recent/")
-async def most_recent():
-    most_recent_submissions = k_most_recent(5)
-    return JSONResponse(most_recent_submissions)
+async def get_most_recent():
+    most_recent_papers = k_most_recently_submitted(20)
+    return JSONResponse(most_recent_papers)
 
+@app.get("/recent/")
+async def get_most_recently_published():
+    most_recent_papers = k_most_recently_published(20)
+    return JSONResponse(most_recent_papers)
 
 # Entries collection format
 """
