@@ -37,14 +37,14 @@ def search_abstracts(text, collection, limit=max_results, covid19_only=False):
     else:
         abstracts_partial = []
 
-    abstracts_exact = [{k: v for k, v in a.items() if k not in ['_id', "_bt", "body_text", "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result"]}
+    abstracts_exact = [{k: v for k, v in a.items() if k not in ['_id', "_bt", "body_text", "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result", "abstract_vec"]}
                  for a in abstracts_exact]
     for k in abstracts_exact:
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
         if 'publication_date' in k.keys() and k['publication_date'] is not None:
             k['publication_date'] = k['publication_date'].strftime("%m/%d/%Y, %H:%M:%S")
 
-    abstracts_partial = [{k: v for k, v in a.items() if k not in ['_id', "_bt", "body_text", "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result"]}
+    abstracts_partial = [{k: v for k, v in a.items() if k not in ['_id', "_bt", "body_text", "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result", "abstract_vec"]}
                  for a in abstracts_partial]
     for k in abstracts_partial:
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
@@ -63,7 +63,7 @@ def get_all():
 
     """
     entries = list(db.google_form_submissions.find({}))
-    entries = [{k: v for k, v in a.items() if k not in ['_id', "last_updated", "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result"]}
+    entries = [{k: v for k, v in a.items() if k not in ['_id', "last_updated", "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result", "abstract_vec"]}
                  for a in entries]
     for e in entries:
         if 'publication_date' in e.keys():
