@@ -124,6 +124,7 @@ def k_most_recently_published(k, only_is_covid=True):
                      "has_month",
                      "has_day",
                      "similar_abstracts"
+                     "last_updated"
                      ]
     returned_fields = ["abstract",
                        "title",
@@ -138,6 +139,7 @@ def k_most_recently_published(k, only_is_covid=True):
                        "summary_human",
                        "summary_ML",
                        "similar_abstracts"
+                       "last_updated"
                        ]
     projection = {field: 1 for field in needed_fields}
 
@@ -222,7 +224,6 @@ def __search_exact(text, collection, limit, covid19_only=False):
     # Clean '_id' key
     abstracts = [{k: v for k, v in a.items() if
                   k not in ['_id',
-                            "last_updated",
                             "PDF_gridfs_id",
                             "pdf_location",
                             "submission_email",
@@ -267,7 +268,6 @@ def __search_partial(text, collection, limit, ids_exact, covid19_only=False):
     # clean '_id' key
     abstracts = [{k: v for k, v in a.items() if
                   k not in ['_id',
-                            "last_updated",
                             "PDF_gridfs_id",
                             "pdf_location",
                             "submission_email",
