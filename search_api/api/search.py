@@ -39,7 +39,7 @@ def search_abstracts(text, collection, limit=100, covid19_only=False):
 
     abstracts_exact = [{k: v for k, v in a.items() if
                         k not in ['_id', "_bt", "body_text", "PDF_gridfs_id", "pdf_location", "submission_email",
-                                  "crossref_raw_result"]}
+                                  "crossref_raw_result", "abstract_vec"]}
                        for a in abstracts_exact]
     for k in abstracts_exact:
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
@@ -48,7 +48,7 @@ def search_abstracts(text, collection, limit=100, covid19_only=False):
 
     abstracts_partial = [{k: v for k, v in a.items() if
                           k not in ['_id', "_bt", "body_text", "PDF_gridfs_id", "pdf_location", "submission_email",
-                                    "crossref_raw_result"]}
+                                    "crossref_raw_result", "abstract_vec"]}
                          for a in abstracts_partial]
     for k in abstracts_partial:
         k["last_updated"] = k["last_updated"].strftime("%m/%d/%Y, %H:%M:%S")
@@ -69,8 +69,13 @@ def get_all():
     """
     entries = list(db.google_form_submissions.find({}))
     entries = [{k: v for k, v in a.items() if
-                k not in ['_id', "last_updated", "PDF_gridfs_id", "pdf_location", "submission_email",
-                          "crossref_raw_result"]}
+                k not in ['_id',
+                          "last_updated",
+                          "PDF_gridfs_id",
+                          "pdf_location",
+                          "submission_email",
+                          "crossref_raw_result",
+                          "abstract_vec"]}
                for a in entries]
     for e in entries:
         if 'publication_date' in e.keys():
@@ -216,7 +221,13 @@ def __search_exact(text, collection, limit, covid19_only=False):
     ids = [a['_id'] for a in abstracts]
     # Clean '_id' key
     abstracts = [{k: v for k, v in a.items() if
-                  k not in ['_id', "PDF_gridfs_id", "pdf_location", "submission_email", "crossref_raw_result"]}
+                  k not in ['_id',
+                            "last_updated",
+                            "PDF_gridfs_id",
+                            "pdf_location",
+                            "submission_email",
+                            "crossref_raw_result",
+                            "abstract_vec"]}
                  for a in abstracts]
     return abstracts, ids
 
@@ -255,7 +266,13 @@ def __search_partial(text, collection, limit, ids_exact, covid19_only=False):
 
     # clean '_id' key
     abstracts = [{k: v for k, v in a.items() if
-                  k not in ['_id', "PDF_gridfs_id", "submission_email", "pdf_location", "crossref_raw_result"]}
+                  k not in ['_id',
+                            "last_updated",
+                            "PDF_gridfs_id",
+                            "pdf_location",
+                            "submission_email",
+                            "crossref_raw_result",
+                            "abstract_vec"]}
                  for a in abstracts]
 
     return abstracts
