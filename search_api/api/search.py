@@ -114,6 +114,7 @@ def k_most_recently_published(k, only_is_covid=True):
                      "category_human",
                      "doi",
                      "is_covid19",
+                     "is_covid19_ml",
                      "similar_abstracts",
                      "link",
                      "keywords",
@@ -144,7 +145,7 @@ def k_most_recently_published(k, only_is_covid=True):
     projection = {field: 1 for field in needed_fields}
 
     if only_is_covid:
-        query = {"is_covid19": True, "publication_date": {"$lt": datetime.now()}}
+        query = {"is_covid19_ml": {"$gt": 0.5}, "publication_date": {"$lt": datetime.now()}}
     else:
         query = {"publication_date": {"$lt": datetime.now()}}
 
@@ -192,7 +193,7 @@ def __search_exact(text, collection, limit, covid19_only=False):
 
     if covid19_only:
         pipeline.append(
-            {"$match": {"is_covid19": True}})
+            {"$match": {"is_covid19_ml": {"$gt": 0.5}}})
 
     pipeline.append({"$limit": limit})
 
@@ -209,7 +210,7 @@ def __search_exact(text, collection, limit, covid19_only=False):
 
     if covid19_only:
         pipeline.append(
-            {"$match": {"is_covid19": True}})
+            {"$match": {"is_covid19_ml": {"$gt": 0.5}}})
 
     pipeline.append({'$sort': {'score': {'$meta': "textScore"}}})
 
@@ -255,7 +256,7 @@ def __search_partial(text, collection, limit, ids_exact, covid19_only=False):
 
     if covid19_only:
         pipeline.append(
-            {"$match": {"is_covid19": True}})
+            {"$match": {"is_covid19_ml": {"$gt": 0.5}}})
 
     pipeline.append({'$sort': {'score': {'$meta': "textScore"}}})
 
