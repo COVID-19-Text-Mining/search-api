@@ -50,6 +50,11 @@ async def get_most_recently_published():
     most_recent_papers = k_most_recently_published(20)
     return JSONResponse(most_recent_papers)
 
+@app.get("/sources/")
+async def get_sources():
+    # takes ~16sec to return right now
+    return get_source_breakdown()
+
 # Entries collection format
 """
 {
