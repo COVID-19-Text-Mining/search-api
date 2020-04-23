@@ -277,3 +277,42 @@ def __search_partial(text, collection, limit, ids_exact, covid19_only=False):
                  for a in abstracts]
 
     return abstracts
+  
+def get_source_breakdown():
+    """
+    Return breakdown of sources for all entries
+    """
+
+    # initialize collections and return dictionary
+    CORD = db.CORD_parsed_vespa
+    elsevier = db.Elsevier_parsed_vespa
+    LitCovid = db.LitCovid_pubmed_xml_parsed_vespa
+    biorxiv = db.biorxiv_parsed_vespa
+    google = db.google_form_submissions_parsed_vespa
+
+    collections = [CORD, elsevier, LitCovid, biorxiv, google]
+
+    results = {'journals' : dict(), 'sources' : dict()}
+    dois = [] # keep track of repeat entries
+
+    for collection in collections:
+        # tally journals
+        for entry in collection.find({}):
+            if 'doi' in entry.keys():
+                if entry['doi'] not in dois:
+                    if 'journal' in entry.keys():
+                        journal = entry['journal']
+                        if journal not in results['journals'].keys():
+                            results['journals'][journal] = 1
+                            dois.append(entry['doi'])
+                        elif journal in results['journals'].keys():
+                            results['journals'][journal] += 1
+                            dois.append(entry['doi'])
+            # tally sources/publishers
+            if 'source_display' in entry.keys():
+                source = entry['source_display']
+                if source not in results['sources'].keys():
+                    results['sources'][source] = 1
+                if source in results['sources'].keys():
+                    results['sources'][source] += 1
+    return results
