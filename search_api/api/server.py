@@ -2,7 +2,7 @@ import sentry_sdk
 from fastapi import FastAPI
 from search_api.database import CovidscholarDB
 from starlette.responses import JSONResponse
-from search_api.api.search import search_abstracts, get_all, k_most_recently_published, k_most_recently_submitted
+from search_api.api.search import search_abstracts, get_all, k_most_recently_published, k_most_recently_submitted, get_source_breakdown
 from pprint import pprint
 
 db = CovidscholarDB()
