@@ -4,6 +4,8 @@ from search_api.database import CovidscholarDB
 from starlette.responses import JSONResponse
 from search_api.api.search import search_abstracts, get_all, k_most_recently_published, k_most_recently_submitted, get_source_breakdown
 from pprint import pprint
+import json
+
 
 db = CovidscholarDB()
 app = FastAPI()
@@ -52,8 +54,9 @@ async def get_most_recently_published():
 
 @app.get("/sources/")
 async def get_sources():
-    # takes ~16sec to return right now
-    return get_source_breakdown()
+    with open('./sources_breakdown.json', 'r') as fp:
+        results = json.load(fp)
+    return JSONResponse(results)
 
 # Entries collection format
 """
